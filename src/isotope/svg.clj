@@ -45,8 +45,8 @@
   (let [x-y-pairs (map #(let [[x-coord
                                y-coord](clojure.string/split %
                                                              #",")]
-                          [(edn/read-string x-coord)
-                           (edn/read-string y-coord)])
+                          [(Double/parseDouble x-coord)
+                           (Double/parseDouble y-coord)])
                        (clojure.string/split points-str #" "))]
     [(double-array (map first x-y-pairs))
      (double-array (map second x-y-pairs))]))
@@ -82,18 +82,18 @@
                             (apply concat)
                             (filterv some?))}]
            :line (.strokeLine canvas
-                              (edn/read-string (:x1 new-attributes))
-                              (edn/read-string (:y1 new-attributes))
-                              (edn/read-string (:x2 new-attributes))
-                              (edn/read-string (:y2 new-attributes)))
+                              (Double/parseDouble (:x1 new-attributes))
+                              (Double/parseDouble (:y1 new-attributes))
+                              (Double/parseDouble (:x2 new-attributes))
+                              (Double/parseDouble (:y2 new-attributes)))
            :text (.strokeText canvas
                               ;; thing/geom is a bit weird here..
                               ;; the text for the `text` element is simply
                               ;; in the 3rd vector position
                               ;; not in an attribute key-value like others
                               (get svg 2)
-                              (edn/read-string (:x new-attributes))
-                              (edn/read-string (:y new-attributes)))
+                              (Double/parseDouble (:x new-attributes))
+                              (Double/parseDouble (:y new-attributes)))
            :polyline (let [[x-s
                             y-s] (parse-points (:points new-attributes))]
                        (.strokePolyline canvas
