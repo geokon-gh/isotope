@@ -24,6 +24,25 @@
         position-transform (fx/sub context
                                    :transform)]
     (if (not-empty oxygen)
+      (let [oxygen-plot (plot/plot-points width
+                                                        height
+                                                        oxygen
+                                                        [(->> oxygen
+                                                              (map first)
+                                                              (apply min)
+                                                              (+ (- 1)))
+                                                         (->> oxygen
+                                                              (map first)
+                                                              (apply max)
+                                                              (+ 1))]
+                                                        [(->> oxygen
+                                                              (map second)
+                                                              (apply min)
+                                                              (+ (- 1)))
+                                                         (->> oxygen
+                                                              (map second)
+                                                              (apply max)
+                                                              (+ 1))])]
       {:fx/type :canvas
        :width width
        :height height
@@ -70,25 +89,7 @@
                (doto (.getGraphicsContext2D canvas)
                  (.clearRect (- width) (- height) (* 3 width) (* 3 height))
                  (.setTransform position-transform)
-                 (svg/paint-on-canvas (plot/plot-points width
-                                                        height
-                                                        oxygen
-                                                        [(->> oxygen
-                                                              (map first)
-                                                              (apply min)
-                                                              (+ (- 1)))
-                                                         (->> oxygen
-                                                              (map first)
-                                                              (apply max)
-                                                              (+ 1))]
-                                                        [(->> oxygen
-                                                              (map second)
-                                                              (apply min)
-                                                              (+ (- 1)))
-                                                         (->> oxygen
-                                                              (map second)
-                                                              (apply max)
-                                                              (+ 1))]))))}
+                 (svg/paint-on-canvas oxygen-plot)))})
       {:fx/type :text
        :text "No data to display"})))
 
