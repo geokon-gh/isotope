@@ -1,0 +1,88 @@
+{:deps
+ {org.clojure/clojure {:mvn/version "1.10.0"}
+  org.clojure/core.cache {:mvn/version "1.0.207"}
+  org.boofcv/boofcv-core {:mvn/version "0.35"
+                          :exclusions [org.boofcv/boofcv-recognition]}
+  cljfx {:mvn/version "1.7.0"
+         :exclusions [org.openjfx/javafx-web
+                      org.openjfx/javafx-media]}
+
+  net.mikera/core.matrix {:mvn/version "0.62.0"}
+  ;;clatrix/clatrix {:mvn/version "0.5.0"}
+
+  ;; Dark magic from:
+  ;; https://old.reddit.com/r/Clojure/comments/fw93gc/new_clojurians_ask_anything/fmspx8m/
+  ;; These are dependencies of `cljfx`
+  ;; By default JavaFX will only bundle binaries for the platform you build on
+  ;; This forces it to also include linux/mac/win binaries
+  org.openjfx/javafx-base {:mvn/version "14"}
+  org.openjfx/javafx-base$linux {:mvn/version "14"}
+  org.openjfx/javafx-base$mac {:mvn/version "14"}
+  org.openjfx/javafx-base$win {:mvn/version "14"}
+  org.openjfx/javafx-controls {:mvn/version "14"}
+  org.openjfx/javafx-controls$linux {:mvn/version "14"}
+  org.openjfx/javafx-controls$mac {:mvn/version "14"}
+  org.openjfx/javafx-controls$win {:mvn/version "14"}
+  org.openjfx/javafx-graphics {:mvn/version "14"}
+  org.openjfx/javafx-graphics$linux {:mvn/version "14"}
+  org.openjfx/javafx-graphics$mac {:mvn/version "14"}
+  org.openjfx/javafx-graphics$win {:mvn/version "14"}
+  org.openjfx/javafx-swing {:mvn/version "14"}
+  org.openjfx/javafx-swing$linux {:mvn/version "14"}
+  org.openjfx/javafx-swing$mac {:mvn/version "14"}
+  org.openjfx/javafx-swing$win {:mvn/version "14"}
+
+  ;; These libraries are not used. This drastically reduces the file size
+  ;; They are also specified as excluded in the `cljfx` call above
+  ;; org.openjfx/javafx-media {:mvn/version "14"}
+  ;; org.openjfx/javafx-media$linux {:mvn/version "14"}
+  ;; org.openjfx/javafx-media$mac {:mvn/version "14"}
+  ;; org.openjfx/javafx-media$win {:mvn/version "14"}
+  ;; org.openjfx/javafx-web {:mvn/version "14"}
+  ;; org.openjfx/javafx-web$linux {:mvn/version "14"}
+  ;; org.openjfx/javafx-web$mac {:mvn/version "14"}
+  ;; org.openjfx/javafx-web$win {:mvn/version "14"}
+
+  criterium {:mvn/version "0.4.6"}
+
+  tick/tick {:mvn/version "0.4.27-alpha"}
+
+  org.clojure/data.csv {:mvn/version "0.1.4"} ;; data injestion
+  thi.ng/geom {:mvn/version "1.0.0-RC4"
+               :exclusions [org.clojure/clojurescript
+                            org.jogamp.jogl/jogl-all]}
+  }
+
+ ;; need to be (re)specified explicitely due to weirdness in cambada
+ ;; https://github.com/jdhollis/cambada#caveats
+ :mvn/repos {"central" {:url "https://repo1.maven.org/maven2/"}
+             "clojars" {:url "https://repo.clojars.org/"}}
+ :paths ["src" "resources"]
+ :aliases {:uberjar-aot {:extra-deps {luchiniatwork/cambada {:mvn/version "1.0.2"}}
+                         ;; This option is necessary to build on a headless machine
+                         ;; ex: Github Actions
+                         ;; see:
+                         ;; https://github.com/cljfx/cljfx/issues/70
+                         :jvm-opts ["-Dcljfx.skip-javafx-initialization=true"]
+                         :main-opts ["-m" "cambada.uberjar"
+                                     ;; Note: `cambada` will not work
+                                     ;; with no AOT compiled `-main`
+                                     "--aot" "all"
+                                     "-m" "isotope.core"]}
+           :native-image {:extra-deps
+                          {luchiniatwork/cambada {:mvn/version "1.0.0"}}
+                          :main-opts ["-m" "cambada.native-image"
+                                      "-m" "isotope.core"]}
+           :reveal {:extra-deps {vlaaad/reveal {:mvn/version "1.1.164"}}
+                    :ns-default vlaaad.reveal
+                    :exec-fn repl}
+
+           ;; To have an uberjar with no AOT compilation you need to
+           ;; - Go into `core.clj` and comment out `(:gen-class :main true)`
+           ;; - Launch the app with `java -corascope.jar -m corascope.core`
+           ;; - Launch time is /very/ slow .. ~17 seconds
+           :uberjar-no-aot {:extra-deps
+                            {seancorfield/depstar {:mvn/version "0.5.2"}}
+                            :main-opts ["-m" "hf.depstar.uberjar"
+                                        "isotope.jar";; "--compile"
+                                        "-m" "clojure.main -m isotope.core"]}}}
