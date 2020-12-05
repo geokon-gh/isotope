@@ -85,7 +85,6 @@
                                                            :mouse-drag
                                                            nil)))}
        :draw (fn [^Canvas canvas]
-               (print \.)
                (doto (.getGraphicsContext2D canvas)
                  (.clearRect (- width) (- height) (* 3 width) (* 3 height))
                  (.setTransform position-transform)
