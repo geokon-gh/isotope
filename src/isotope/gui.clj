@@ -1,14 +1,17 @@
 (ns isotope.gui
-  (:require [isotope.input :as input]
-            [isotope.state :as state]
-            [isotope.svg :as svg]
-            [isotope.plot :as plot]
-            [tick.alpha.api :as t]
-            [clojure.data.csv :as csv]
-            [clojure.java.io :as io]
-            [cljfx.api :as fx])
-  (:import [javafx.scene.canvas Canvas]
-           [javafx.scene.paint Color]))
+  (:require
+   [isotope.input :as input]
+   [isotope.state :as state]
+   [isotope.svg :as svg]
+   [isotope.plot :as plot]
+   [tick.alpha.api :as t]
+   [clojure.data.csv :as csv]
+   [clojure.java.io :as io]
+   [cljfx.api :as fx])
+  (:import
+   [javafx.scene.canvas Canvas]
+   [javafx.scene.transform Affine Translate]
+   [javafx.scene.paint Color]))
 
 
 
@@ -17,15 +20,56 @@
            width
            height]}]
   (let [oxygen (fx/sub context
-                       state/oxygen)]
+                       state/oxygen)
+        position-transform (fx/sub context
+                                   :transform)]
     (if (not-empty oxygen)
       {:fx/type :canvas
        :width width
        :height height
+       :on-mouse-dragged  {:effect (fn [snapshot
+                                        {:keys [fx/event]}]
+                                     (let [{:keys [last-x
+                                                   last-y]} (fx/sub snapshot
+                                                                    :mouse-drag)
+                                           new-x (.getX event)
+                                           new-y (.getY event)
+                                           delta-x (- new-x
+                                                      last-x)
+                                           delta-y (- new-y
+                                                      last-y)
+                                           new-transform (Translate. delta-x
+                                                                     delta-y)]
+                                       (-> snapshot
+                                           (fx/swap-context assoc-in
+                                                            [:mouse-drag :last-x]
+                                                            new-x)
+                                           (fx/swap-context assoc-in
+                                                            [:mouse-drag :last-y]
+                                                            new-y)
+                                           (fx/swap-context update
+                                                            :transform
+                                                            #(.createConcatenation % new-transform)))))}
+       :on-mouse-pressed  {:effect (fn [snapshot
+                                        {:keys [fx/event]}]
+                                     (-> snapshot
+                                         (fx/swap-context assoc-in
+                                                          [:mouse-drag :last-x]
+                                                          (.getX event))
+                                         (fx/swap-context assoc-in
+                                                          [:mouse-drag :last-y]
+                                                          (.getY event))))}
+       :on-mouse-released  {:effect (fn [snapshot
+                                         {:keys [fx/event]}]
+                                      (-> snapshot
+                                          (fx/swap-context assoc
+                                                           :mouse-drag
+                                                           nil)))}
        :draw (fn [^Canvas canvas]
                (print \.)
                (doto (.getGraphicsContext2D canvas)
-                 (.clearRect 0 0 width height)
+                 (.clearRect (- width) (- height) (* 3 width) (* 3 height))
+                 (.setTransform position-transform)
                  (svg/paint-on-canvas (plot/plot-points width
                                                         height
                                                         oxygen

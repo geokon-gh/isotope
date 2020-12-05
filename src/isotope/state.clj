@@ -1,11 +1,14 @@
 (ns isotope.state
   (:require
    [clojure.core.cache :as cache]
-   [cljfx.api :as fx]))
+   [cljfx.api :as fx])
+  (:import
+   [javafx.scene.transform Affine]))
 
 (def *context
   ""
   (atom (fx/create-context {:data nil
+                            :transform (Affine.)
                             :width 200
                             :height 200}
                            #(cache/lru-cache-factory % :threshold 4096))))

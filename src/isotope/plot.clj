@@ -20,10 +20,10 @@
                            (- max-y
                               min-y)))
              :visible true
-             :label-style {:stroke "darkgray"
-                           :fill "darkgray"
+             :label-style {:stroke "transparent"
+                           :fill "transparent"
                            :font-family nil}
-             :label-dist  (- height 1)
+             :label-dist  0
              ;;             :major-size 0
              :major 365
              :major-size -15
